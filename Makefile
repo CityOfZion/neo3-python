@@ -66,5 +66,9 @@ docs: ## generate Sphinx HTML documentation, including API docs
 	sphinx-build -b html docs/source/ docs/build/
 	$(BROWSER) docs/build/index.html
 
+publish-docs:
+	$(MAKE) docs
+	aws s3 sync ./docs/build  s3://docs-coz/neo3/mamba --acl public-read
+
 type: ## perform static type checking using mypy
 	mypy neo3/

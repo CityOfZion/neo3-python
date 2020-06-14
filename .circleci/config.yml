@@ -72,6 +72,24 @@ jobs:
             pip install codecov
             codecov
 
+
+  publish-docs:
+    executor: python38-executor
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: install aws cli
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+      - run:
+          name: Build and release docs
+          command: |
+            source venv/bin/activate
+            make publish-docs
+
 workflows:
   main:
     jobs:
@@ -86,5 +104,17 @@ workflows:
           requires:
             - setup-environment
       - code-coverage:
+          requires:
+            - setup-environment
+
+  update-docs:
+    jobs:
+      - approve-update:
+          type: approval
+      - setup-environment:
+          requires:
+            - approve-update
+      - publish-docs:
+          context: aws
           requires:
             - setup-environment
